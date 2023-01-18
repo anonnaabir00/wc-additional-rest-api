@@ -41,16 +41,16 @@ text-domain: wc-additional-rest-api
             public function register_routes() {
     
                 register_rest_route( 'wcapi/v1', '/customer/downloads', array(
-                    'methods' => 'GET',
+                    'methods' => 'POST',
                     'callback' => array( $this, 'get_downloads' ),
                 ) );
     
             }
 
-            public function get_downloads() {
+            public function get_downloads($request) {
 
                     // Get customer ID
-                    $customer_id = 1;
+                    $customer_id = $request['customer_id'];
                     
                     $downloads = [];
 
