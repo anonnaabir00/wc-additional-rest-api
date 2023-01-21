@@ -2,21 +2,14 @@
 
 /*
 
-Plugin Name: WooCommerce Additional Rest API
-
-Plugin URI: https://codember.com
-
-Description: A brief description of the Plugin.
-
-Version: 1.0.0
-
-Author: Codember
-
-Author URI: https://codember.com
-
-License: A "Slug" license name e.g. GPL2
-
-text-domain: wc-additional-rest-api
+* Plugin Name: WooCommerce Additional Rest API
+* Plugin URI: https://codember.com
+* Description: A brief description of the Plugin.
+* Version: 1.5
+* Author: Codember
+* Author URI: https://codember.com
+* License: A "Slug" license name e.g. GPL2
+* text-domain: wc-additional-rest-api
 
 */
 
@@ -49,14 +42,15 @@ text-domain: wc-additional-rest-api
 
             public function get_downloads($request) {
 
-                    // Get customer ID
-                    $customer_id = $request['customer_id'];
+                    // Retrive customer ID from email
+
+                    $customer_id = get_user_by('email',$request['email']);
                     
                     $downloads = [];
 
                     // get customers orders
                     $orders = wc_get_orders( array(
-                        'customer' => $customer_id,
+                        'customer' => $customer_id->ID,
                     ) );
 
                     // Loop through orders and Get downloads for each order
