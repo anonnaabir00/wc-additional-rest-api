@@ -4,8 +4,8 @@
 
 * Plugin Name: WooCommerce Additional Rest API
 * Plugin URI: https://codember.com
-* Description: A brief description of the Plugin.
-* Version: 1.5
+* Description: This plugin adds additional endpoints to WooCommerce Rest API.
+* Version: 2.0
 * Author: Codember
 * Author URI: https://codember.com
 * License: A "Slug" license name e.g. GPL2
@@ -37,6 +37,11 @@
                     'methods' => 'POST',
                     'callback' => array( $this, 'get_downloads' ),
                 ) );
+
+                register_rest_route( 'wcapi/v1', '/order/coupon', array(
+                    'methods' => 'POST',
+                    'callback' => array( $this, 'check_coupon' ),
+                ) );
     
             }
 
@@ -61,6 +66,23 @@
 
                     return $downloads;
 
+            }
+
+
+            public function check_coupon($request){
+                $coupon = $request['coupon'];
+
+                if (wc_get_coupon_id_by_code( $coupon ) ) {
+                    return [
+                        'status' => 200,
+                        'message' => 'Coupon is valid',
+                    ];
+                } else {
+                    return [
+                        'status' => 404,
+                        'message' => 'Coupon is not valid',
+                    ];
+                }
             }
     
         }
