@@ -5,7 +5,7 @@
 * Plugin Name: WooCommerce Additional Rest API
 * Plugin URI: https://codember.com
 * Description: This plugin adds additional endpoints to WooCommerce Rest API.
-* Version: 2.0
+* Version: 2.1
 * Author: Codember
 * Author URI: https://codember.com
 * License: A "Slug" license name e.g. GPL2
@@ -41,6 +41,11 @@
                 register_rest_route( 'wcapi/v1', '/order/coupon', array(
                     'methods' => 'POST',
                     'callback' => array( $this, 'check_coupon' ),
+                ) );
+
+                register_rest_route( 'wcapi/v1', '/order/create', array(
+                    'methods' => 'POST',
+                    'callback' => array( $this, 'create_order' ),
                 ) );
     
             }
@@ -83,6 +88,74 @@
                         'message' => 'Coupon is not valid',
                     ];
                 }
+            }
+
+            public function create_order($request){
+                $product_id = $request['product_id'];
+                $coupon = $request['coupon'];
+                
+                $address = array(
+                    'first_name' => $request['first_name'],
+                    'last_name'  => $request['last_name'],
+                    'email'      => $request['email'],
+                    'address_1'  => $request['address'],
+                );
+
+                $user = strstr($request['email'], '@', true);
+
+                // generate random password
+                $password = wp_generate_password( 12, true );
+
+                // Create User
+                
+                $create_user = wp_insert_user( array(
+                    'user_login' => $user,
+                    'user_pass' => $password,
+                    'user_email' => $request['email'],
+                    'first_name' => $request['first_name'],
+                    'last_name' => $request['last_name'],
+                    'display_name' => $request['first_name'].' '.$request['last_name'],
+                    'role' => 'subscriber'
+                  ));
+
+                
+                // Get User ID
+                $user_id = get_user_by('id', $create_user);
+
+                // Create order
+                $order = wc_create_order();
+
+                // Add Product
+                $order->add_product(wc_get_product($product_id), 1 );
+
+                // Apply Coupon
+                $order->apply_coupon($coupon);
+
+                // Set Customer ID
+                $order->set_customer_id($user_id->ID);
+
+                // Set address
+                $order->set_address( $address, 'billing' );
+
+                // add payment method
+                $order->set_payment_method( 'cod' );
+                $order->set_payment_method_title( 'Paddle' );
+
+                $order->set_status( 'wc-completed', 'Order is created programmatically' );
+
+                $order->calculate_totals();
+                
+                return [
+                    'status' => 200,
+                    'message' => 'Order is created',
+                    'order_id' => $order->get_id(),
+                    'user_id' => $user_id->ID,
+                    'password' => $password,
+                ];
+
+                // Set cart hash
+                // $order->set_cart_hash( $request['cart_hash'] );
+
             }
     
         }
