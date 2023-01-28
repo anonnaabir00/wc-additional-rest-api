@@ -5,7 +5,7 @@
 * Plugin Name: WooCommerce Additional Rest API
 * Plugin URI: https://codember.com
 * Description: This plugin adds additional endpoints to WooCommerce Rest API.
-* Version: 2.1
+* Version: 2.2
 * Author: Codember
 * Author URI: https://codember.com
 * License: A "Slug" license name e.g. GPL2
@@ -101,26 +101,32 @@
                     'address_1'  => $request['address'],
                 );
 
-                $user = strstr($request['email'], '@', true);
+                // $user = strstr($request['email'], '@', true);
 
                 // generate random password
                 $password = wp_generate_password( 12, true );
 
                 // Create User
-                
-                $create_user = wp_insert_user( array(
-                    'user_login' => $user,
-                    'user_pass' => $password,
-                    'user_email' => $request['email'],
-                    'first_name' => $request['first_name'],
-                    'last_name' => $request['last_name'],
-                    'display_name' => $request['first_name'].' '.$request['last_name'],
-                    'role' => 'subscriber'
-                  ));
 
+                // if user email does not exist, then create user
+                if ( !email_exists( $request['email'] ) ) {
+                    $create_user = wp_insert_user( array(
+                        'user_login' => $request['email'],
+                        'user_pass' => $password,
+                        'user_email' => $request['email'],
+                        'first_name' => $request['first_name'],
+                        'last_name' => $request['last_name'],
+                        'display_name' => $request['first_name'].' '.$request['last_name'],
+                        'role' => 'subscriber'
+                    ));
+                    // get user id
+                    $user_id = get_user_by('id', $create_user);
+                }
                 
-                // Get User ID
-                $user_id = get_user_by('id', $create_user);
+                else {
+                    $user_id = get_user_by('email', $request['email']);
+                }
+                
 
                 // Create order
                 $order = wc_create_order();
