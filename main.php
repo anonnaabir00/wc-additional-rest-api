@@ -77,7 +77,13 @@
                         ];
                     }
 
-                    return $downloads;
+                    else {
+                        return [
+                            'status' => 200,
+                            'message' => 'Downloads found',
+                            'downloads' => $downloads,
+                        ];
+                    }
 
             }
 
