@@ -5,7 +5,7 @@
 * Plugin Name: WooCommerce Additional Rest API
 * Plugin URI: https://codember.com
 * Description: This plugin adds additional endpoints to WooCommerce Rest API.
-* Version: 2.2
+* Version: 2.3
 * Author: Codember
 * Author URI: https://codember.com
 * License: A "Slug" license name e.g. GPL2
@@ -67,6 +67,14 @@
 
                     foreach ( $orders as $order ) {
                         $downloads = array_merge( $downloads, $order->get_downloadable_items() );
+                    }
+
+                    // check if downloads are empty
+                    if ( empty( $downloads ) ) {
+                        return [
+                            'status' => 404,
+                            'message' => 'No downloads found',
+                        ];
                     }
 
                     return $downloads;
