@@ -5,7 +5,7 @@
 * Plugin Name: WooCommerce Additional Rest API
 * Plugin URI: https://codember.com
 * Description: This plugin adds additional endpoints to WooCommerce Rest API.
-* Version: 2.3
+* Version: 2.4
 * Author: Codember
 * Author URI: https://codember.com
 * License: A "Slug" license name e.g. GPL2
@@ -77,13 +77,11 @@
                         ];
                     }
 
-                    else {
                         return [
                             'status' => 200,
                             'message' => 'Downloads found',
                             'downloads' => $downloads,
                         ];
-                    }
 
             }
 
