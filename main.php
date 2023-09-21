@@ -5,7 +5,7 @@
 * Plugin Name: WooCommerce Additional Rest API
 * Plugin URI: https://codember.com
 * Description: This plugin adds additional endpoints to WooCommerce Rest API.
-* Version: 2.4
+* Version: 2.5
 * Author: Codember
 * Author URI: https://codember.com
 * License: A "Slug" license name e.g. GPL2
@@ -47,6 +47,11 @@
                     'methods' => 'POST',
                     'callback' => array( $this, 'create_order' ),
                 ) );
+
+                register_rest_route( 'wcapi/v1', '/customer/orders', array(
+                    'methods' => 'POST',
+                    'callback' => array( $this, 'get_orders' ),
+                ) );
     
             }
 
@@ -84,6 +89,89 @@
                         ];
 
             }
+
+
+            public function get_orders($request) {
+                $customer_id = get_user_by('email', $request['email']);
+                
+                if (!$customer_id) {
+                    return [
+                        'status' => 404,
+                        'message' => 'Customer not found',
+                    ];
+                }
+            
+                $all_orders = [];
+            
+                // Get customer's orders
+                $orders = wc_get_orders(array(
+                    'customer' => $customer_id->ID,
+                ));
+            
+                // Loop through orders
+                foreach ($orders as $order) {
+                    $order_items = $order->get_items();
+            
+                    // Initialize an array to store item details for this order
+                    $order_details = [];
+            
+                    // Loop through order items
+                    foreach ($order_items as $item_id => $item) {
+                        $product_id = $item->get_product_id();
+                        $variation_id = $item->get_variation_id();
+                        $product = $item->get_product();
+                        $product_name = $item->get_name();
+                        $quantity = $item->get_quantity();
+                        $subtotal = $item->get_subtotal();
+                        $total = $item->get_total();
+                        $tax = $item->get_subtotal_tax();
+                        $tax_class = $item->get_tax_class();
+                        $tax_status = $item->get_tax_status();
+                        $allmeta = $item->get_meta_data();
+                        $somemeta = $item->get_meta('_whatever', true);
+                        $item_type = $item->get_type();
+            
+                        // Create an array to store item details
+                        $item_details = [
+                            'product_id' => $product_id,
+                            'variation_id' => $variation_id,
+                            'product' => $product,
+                            'product_name' => $product_name,
+                            'quantity' => $quantity,
+                            'subtotal' => $subtotal,
+                            'total' => $total,
+                            'tax' => $tax,
+                            'tax_class' => $tax_class,
+                            'tax_status' => $tax_status,
+                            'allmeta' => $allmeta,
+                            'somemeta' => $somemeta,
+                            'item_type' => $item_type,
+                        ];
+            
+                        // Add item details to the order details array
+                        $order_details[] = $item_details;
+                    }
+            
+                    // Add the order details for this order to the $all_orders array
+                    $all_orders[] = $order_details;
+                }
+            
+                // Check if orders are empty
+                if (empty($all_orders)) {
+                    return [
+                        'status' => 404,
+                        'message' => 'No orders found',
+                    ];
+                }
+            
+                return [
+                    'status' => 200,
+                    'message' => 'Orders found',
+                    'orders' => $all_orders,
+                ];
+            }            
+            
+                                
 
 
             public function check_coupon($request){
