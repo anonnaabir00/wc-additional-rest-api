@@ -92,21 +92,25 @@
 
 
             public function get_orders($request) {
-                $customer_id = get_user_by('email', $request['email']);
+                // $customer_id = get_user_by('email', $request['email']);
                 
-                if (!$customer_id) {
-                    return [
-                        'status' => 404,
-                        'message' => 'Customer not found',
-                    ];
-                }
+                // if (!$customer_id) {
+                //     return [
+                //         'status' => 404,
+                //         'message' => 'Customer not found',
+                //     ];
+                // }
             
                 $all_orders = [];
             
                 // Get customer's orders
-                $orders = wc_get_orders(array(
-                    'customer' => $customer_id->ID,
-                ));
+                // $orders = wc_get_orders(array(
+                //     'customer' => $customer_id->ID,
+                // ));
+
+                $orders = wc_get_orders( array(
+                    'billing_email' => $request['email'],
+                ) );
             
                 // Loop through orders
                 foreach ($orders as $order) {
